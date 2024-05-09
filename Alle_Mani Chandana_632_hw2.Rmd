@@ -1,0 +1,188 @@
+---
+title: "STAT 632- HOMEWORK -2"
+author: "Alle Mani Chandana"
+date: "2024-02-16"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Excercise 1:
+
+a)  The assumptions for the simple linear regression model are
+
+1.  Linearity: There exists a linear relationship between predictor variable and response variable.
+
+2.  Independence : The residuals are independent of each other (random sample).
+
+3.  Constant Variance: The variance is constant across all levels of the independence variable.
+
+4.  Normality: The residuals are normally distributed.
+
+Common diagnostics to check the assumptions are
+
+(i). Q-Q plot: It compares the shape of the residuals to a perfect normal distribution. If the points fall in a straight line, it means the data is normally distributed.
+
+(ii). Residuals vs Fitted Values Plot: It shows if the points are randomly scattered around the line to look like a random cloud (random sample).
+
+b)  An outlier is a point that does not follow the pattern set by the bulk of the data i.e, they do not fit with the patterns of other points. That is, outliers have y -values that do not follow the pattern set by the bulk of the data. We can identify a point as a outlier if the standardized residual of the point falls outside the interval from -2 to 2. For large data sets, the range is from -4 to 4.
+
+c)  A leverage point is a point whose x-values are distant from other x-values. High leverage points are data points the have a big influence on where the line goes. A popular rule is to classify $x_i$ as a point of high leverage in a simple linear regression model if
+
+$h_i > 2 × average(h_i ) = 2 × 2/n = 4/n$
+
+Any point whose leverage value >2 times the average leverage is considered to have high leverage.
+
+d)  Formulas for error, residual, and standardized residual:
+
+Error: $\epsilon_i = y_i - \hat{y_i}$
+
+Residual: $e_i = y_i - (\hat{\beta_0} + \hat{\beta_1}x_i)$
+
+(βˆ
+0 + βˆ
+1xi)
+
+Standardized Residual: $r_i = \hat{\epsilon_i}/ (\hat{\sigma} * \sqrt{(1 - h_i)})$,
+
+where residual standard error is given by 
+
+$\hat{\sigma}$ = $\sqrt{1/(n-2) \sum i=1 to n \hat{e_i}^2} $
+
+Variance of $\epsilon_i$: Var($\epsilon_i$) = $\sigma^2$
+
+Variance of $e_i$: Var($e_i$) = $\sigma^2(1 - h_{i})$
+
+The reasons that the standardized residuals vs the fitted values is useful because
+
+(i). It detects the non-linearity - Patterns in the plot may suggest that the relationship between the predictor and response variables is not purely linear
+
+(ii). It detects the if there are any unequal error variances. If the spread of points changes as we move along the line, it tells us that the variability of our data is not consistent.
+
+
+### Excercise 2:
+
+a) True
+
+b) False
+
+While using the log transformation can help stabilize the variance for count data, it's "too strong" for the variance. There are other transformations like square root or Box-Cox transformation that can also do this job, depending on the nature of the data.
+
+c) False
+
+There is no need to transform both the predictor and response variables. It depends on the data. Sometimes, transforming just one variable is enough to meet the assumptions of the regression model.
+
+d) False
+
+$R^2$ is important for telling us how well our model fits the data, it doesn't automatically mean that a straight line is the perfect fit. Even if $R^2$ is close to 1, it doesn't guarantee that our line is the best way to represent the relationship between variables.
+
+e) True
+
+### Excercise 3:
+
+```{r}
+#Load the dataset
+
+UN11 <- read.csv("~/STAT 632/UN11.csv", stringsAsFactors=TRUE)
+```
+
+a)
+
+```{r}
+
+#Scatterplot for ppgdp and fertility
+
+plot(UN11$ppgdp, UN11$fertility, xlab = "Gross National Product per Person",
+     ylab = "Total Fertility Rate", main = "Scatterplot of Fertility vs. GDP", col = "skyblue")
+
+```
+
+We should consider log transformations for this data because the relationship between fertility and gross national product per person may not be linear. Using log transformations can help make the relationship more linear and stabilize the variance of the data.
+
+b)
+
+```{r}
+
+#Scatterplot for log transformed ppgdp and fertility 
+
+plot(log(UN11$ppgdp), log(UN11$fertility), xlab = "Log Gross National Product per Person",
+     ylab = "Log Total Fertility Rate", main = "Scatterplot of Log Fertility vs. Log GDP", col = "skyblue")
+
+abline(lm(log(fertility) ~ log(ppgdp), data = UN11), col = "red")#Regression Line
+
+
+```
+
+The points form a straight line (roughly). It suggests that the data is now linear.
+
+c)
+
+```{r}
+
+# Fitting the regression model
+model <- lm(log(fertility) ~ log(ppgdp), data = UN11)
+
+# Print the summary
+summary(model)
+
+
+```
+
+d) The equation for the least squares line after using the log function is 
+
+$log(\hat{fert})= 2.66+ (-0.20) * log(ppgdp)$
+
+here $\hat{fert}$ is fertility rate.
+
+e) From above equation of regression line its clear that with increase in every unit of log(ppgdp) there will be decrease in log(fertility) value by 0.2071.(i.e. slope of the line is -0.2071).
+
+f) 
+
+```{r}
+
+data <- data.frame(ppgdp = 1000)
+
+predicted_ppgdp <- predict.lm(model, data, interval = "prediction", level = 0.95)
+
+#print the predicted values
+predicted_ppgdp
+
+#Print the transformed predicted values
+exp(predicted_ppgdp)
+
+```
+
+g) yes, all the assumptions of Simple linear regression i.e (Linearity, independence, normality and constant variance) are satisfied.
+
+
+```{r}
+
+# Plot for Standardized residuals vs Fitted values
+plot(fitted(model), rstandard(model), xlab = "Fitted values", ylab = "Standardized values", main = "Standardized Residuals vs Fitted Values", col = "blue")
+
+# Q-Q plot of standardized residuals
+qqnorm(rstandard(model))
+qqline(rstandard(model), col="green", lwd = 2)
+              
+
+
+```
+
+h) 
+
+```{r}
+
+# Identifying the outliers
+outliers <- rownames(UN11[abs(rstandard(model)) > 2, ])
+
+#Print the outliers
+outliers
+
+```
+
+There are seven countries which have outliers , In my view its not necessary to remove these points as they are not effecting the values to such an extent and also these are not any bad leverage points there is no need to remove these points.
+

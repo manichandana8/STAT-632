@@ -1,0 +1,180 @@
+---
+title: 'STAT 632: Homework 1'
+author: "Alle Mani Chandana"
+date: 'Due: 1st Feb, 2024'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+Excercise 0: GitHub link
+
+"https://github.com/manichandana8/STAT-632"
+
+1.  
+
+<!-- -->
+
+c)  
+
+```{r}
+
+#missing p-value for the intercept.
+
+t_stat <- -2.699
+n <- 50
+pt(t_stat, n-2)
+```
+
+e)  
+
+```{r}
+
+#95% confidence interval for the slope of the regression line
+
+tcrit <- qt(0.975, n-2)
+
+2.26 - (tcrit * 0.098)
+
+2.26 + (tcrit * 0.098)
+```
+
+3.  
+
+<!-- -->
+
+a)  
+
+```{r}
+# Load the dataset
+library(readr)
+playbill <- read.csv("~/STAT 632/playbill.csv", stringsAsFactors=TRUE)
+
+#Scatterplot of t of the response (current week sales) versus the explanatory
+# (previous week sales) variable
+
+plot(CurrentWeek ~ LastWeek, data = playbill, 
+     xlab = "Current week ($)", ylab = "Previous Week ($)")
+
+lm1 <- lm(CurrentWeek ~ LastWeek, data = playbill)
+
+abline(lm1, col = "red")
+
+```
+
+b)  
+
+```{r}
+# 95% confidence intervals for beta0 and beta1 
+
+confint(lm1)
+```
+
+The confidence interval for the slope $\beta_1$ is (1.013, 9.515). The value 1 does not fall in this interval. So, it is not a plausible value for $\beta_1$.
+
+c)  
+
+```{r}
+# Estimated gross box office results for current week for a production with 
+#$400,000 in gross box office the previous week.
+
+summary(lm1)
+
+x <- 400000
+
+new_playbill <- data.frame(LastWeek = x)
+ 
+estimated_gross <- predict(lm1, new_playbill)
+
+cat("The Estimated gross box office results for current week for a production with 
+    $400,000 in gross box office in the previous week is",estimated_gross,".")
+
+# 95% Prediction interval for the current week with 
+#$400,000 in the previous week
+
+prediction_interval <- predict(lm1, new_playbill, interval = "prediction", level = 0.95)
+
+prediction_interval
+
+```
+
+The 95% prediction interval for the gross box office results for the current week for a production with \$400,000 in the previous week is (359832.8, 439442.2). The value \$450,000 does not fall in the above interval. Hence, it is not a feasible value for the gross box office results in the current week, for production with \$400,000 in the previous week.
+
+d)  
+
+The scatter plot and regression line suggest that the model fits well but we need to check more to make sure the model can predict how well Broadway plays will do at the box office. the prediciton rule used by the promoters of Broadway stated that next week’s gross box office results will be equal to this week’s gross box office results. This can be true from the scatter plot and regression line.
+
+4.  
+
+```{r}
+# Load the dataset
+
+# install.packages("alr4")
+
+library(alr4)
+
+View(oldfaith)
+
+```
+
+a)  
+
+```{r}
+
+# Performing simple linear regression and printing the results
+model <- lm(Interval ~ Duration, data = oldfaith)
+
+summary(model)
+```
+
+b)  
+
+```{r}
+
+# Scatter plot of Interval vs Duration
+plot(Interval ~ Duration, data = oldfaith)
+
+abline(model, col = "blue")
+
+```
+
+c)  
+
+```{r}
+
+# Calculating the estimated time an individual has to wait until the next eruption when 
+#the eruption lasts for 250 seconds.
+
+new_duration <- 250
+
+new_alr4 <- data.frame(Duration = new_duration)
+ 
+estimated_time <- predict(model, new_alr4)
+
+cat("The estimated amount of time the individual will have to wait until the next 
+    eruption is",estimated_time,"minutes.")
+
+# The 95% prediction interval for the time the individual will have to
+#wait for the next eruption
+
+PredictionIntervals <- predict(model, new_alr4, interval = "prediction", level = 0.95)
+
+PredictionIntervals
+
+```
+
+The 95% prediction intervals for the time the individual will have to wait for the next eruption is (66.35, 90.05).
+
+d)  
+
+```{r}
+# Interpreting the coefficient of determination 
+
+cor(oldfaith$Interval, oldfaith$Duration)^2
+
+```
+
+The coefficient of determination is interpreted as the proportion of variability in the response variable (Interval) that is expalined by predictor variable (Duration). Hence, 80.29% of the variability in interval (time to the next eruption) can be explained by duration (time taken for the current eruption).

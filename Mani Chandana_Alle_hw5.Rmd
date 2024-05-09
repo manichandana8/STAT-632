@@ -1,0 +1,124 @@
+---
+title: 'STAT 632: HOMEWORK 5'
+author: "Alle Mani Chandana"
+date: "2024-04-02"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Load the data
+library(readr)
+hdi2018 <- read_csv("C:/Users/Mani chandana/Downloads/hdi2018.csv")
+
+head(hdi2018)
+```
+
+
+
+## Exercise 1:
+
+a) 
+
+```{r}
+lm1 <- lm(hdi_2018 ~ median_age + pctpop65 + pct_internet + pct_labour, data = hdi2018)
+```
+
+b) 
+
+```{r}
+summary(lm1)
+```
+
+Null hypothesis ($H_0$): There is no relationship between `hdi_2018` and the predictor variables (`median_age`, `pctpop65`, `pct_internet`, `pct_labour`).
+
+Alternate hypothesis ($H_A$): There is a relationship between `hdi_2018` and atleast one predictor variable.
+
+The F-statistic and p-value from the above model is $341.5$ and <$2.2e-16$, respectively. Here, p-value is less than 0.05 ($\alpha$), which indicates that we reject the null hypothesis. Therefore, there is atleast one predictore variable that has a strong relationship with the variable `hdi_2018`.
+
+c) 
+
+```{r}
+summary(lm1)
+```
+
+From the above model, we can see that both `median_age` and `pct_internet` has p-values less than 0.05 ($\alpha$). Based on the p-values we can say that both `median_age` and `pct_internet` are statistically significant, whereas `pctpop65` and `pct_labour` are not.
+
+d)
+
+```{r}
+# Reduced model with median_age and pct_internet
+
+lm2 <- lm(hdi_2018 ~ median_age + pct_internet, data = hdi2018)
+
+#Perform anova to compare reduced model and full model in (a)
+anova(lm2, lm1)
+```
+
+Null hypothesis ($H_0$): Reduced model fits with the data significantly better than the full model.
+
+Alternate hypothesis ($H_A$): Rreduced model fits with the data same as the full model.
+
+From the above comparison of full model and reduced model, we can see that the p-value is greater than 0.05 ($\alpha$). Hence, we failed to reject the null hypothesis. Therefore, the reduced model fits better than the full model with data, indicating that we can remove the variables `pctpop65` and `pct_labour` from the model.
+
+e)
+
+```{r}
+
+summary(lm1)$adj.r.squared
+summary(lm2)$adj.r.squared
+```
+
+The adjusted-$R^2$ values of full model and reduced model shows that reduced model has higher value than the full model. The model with the highest adjusted-$R^2$ is a better fit for a data. Hence, the reduced model is a best fit for the data as we stated before. 
+
+
+## Exercise 2: 
+
+a) 
+
+```{r}
+lm2 <- lm(hdi_2018 ~ median_age + pct_internet, data = hdi2018)
+
+#Scatterplot matrix of the three variables in reduced model
+pairs(hdi_2018 ~ median_age + pct_internet, data = hdi2018)
+
+```
+
+The scatterplot matrix of `hdi_2018`, `median_age` and `pct_internet`, we can see an upward trend of points in each scatteplot. This indicates that there is a linear relationship for the predictor variables (`median_age`, `pct_internet`) and the response variable (`hdi_2018`).
+
+b) 
+
+```{r}
+# Residuals vs Fitted values plot
+
+plot(predict(lm2), rstandard(lm2), xlab = "Fitted Values", ylab = "Standardized Residuals")
+
+```
+
+```{r}
+# QQ-Plot
+qqnorm(rstandard(lm2))
+qqline(rstandard(lm2))
+abline(h = 0)
+
+```
+
+c)
+
+```{r}
+p <- 2
+n <- nrow(hdi2018)
+
+#Leverage values vs residuals plot
+plot(hatvalues(lm2), rstandard(lm2), xlab = "Leverage Values", ylab = "Standardized Residuals")
+abline( v = 2 * (p + 1) / n, lty = 2)
+
+```
+
+From the above scatterplot, we can observe that there are 7 points that are considered as influential points/outliers, as they have high leverage values and high standardized residuals.
+
+d) Based on the scatterplot matrix and model diagnostics of this reduced model, we can observe that the data is linear in both plots. Additionally, the data is satisfied for normality in both the cases along with the equal variance. There is also information about the outliers in the data that may affect the model. All the multi-linear regression assumptions are satisfied by this model. We can say this is a best fit for this data. As of now, it is good, but we can improve this model by transforming into polynomial or logarithmic transformations.
+

@@ -1,0 +1,163 @@
+---
+title: "STAT 632 - HOMEWORK 3"
+author: "Alle Mani Chandana"
+date: "2024-03-06"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Excercise 1:  
+For this question use the Auto data set from the ISLR package. To access this data set first install the package using install.packages("ISLR") (this only needs to be done once).  Then load the package into R using the command library(ISLR). You can read about this data
+set in the help menu by entering the command help(Auto).
+
+```{r}
+#Load the required libraries
+#install.packages("ISLR")
+library(ISLR)
+library(ggplot2)
+
+# Load the dataset
+data(Auto)
+
+```
+
+a) Make a scatter plot with mpg on the y-axis, and horsepower on the x-axis.
+
+```{r}
+ggplot(data = Auto, aes(horsepower, mpg)) +
+  geom_point(col = "red",
+             size = 1.5) +
+  labs(x = "Horsepower", 
+       y = "MPG", 
+       title = "Scatter plot of MPG vs Horsepower")
+```
+
+b) Use the lm() function to estimate a second degree (quadratic) polynomial regression model.
+That is, fit the model $Y = \beta_0 + \beta_1x + \beta_2x^2 + e$, where Y = mpg and x = horsepower. Use the
+summary() function to print the results.
+
+```{r}
+
+# second degree polynomial regression model for mpg and horsepower
+lm1 <- lm(mpg ~ horsepower + I(horsepower^2), data = Auto)
+summary(lm1)
+```
+
+c) Use the fitted regression model to make a prediction and 95% prediction interval for the mpg
+of a vehicle that has horsepower = 150.
+
+```{r}
+new_Auto <- data.frame(horsepower = 150)
+prediction <- predict(lm1, newdata = new_Auto, interval = "prediction", level = 0.95)
+prediction
+```
+
+The 95% prediction interval for the mpg of a vehicle who has a horsepower of 150 is $(6.03, 23.29)$.
+
+d) Add the fitted second degree polynomial regression curve to the scatter plot of mpg versus
+horsepower. You may use either the base-R or ggplot2 approach.
+
+```{r}
+
+# Scatter plot of mpg vs horsepower with fitted second degree polynomial regression curve
+ggplot(data=Auto, aes(horsepower, mpg)) +
+  geom_point(size=1.5,
+             col = "red") +
+  stat_smooth(method = 'lm', formula = y ~ splines::bs(x,7))
+
+```
+
+e) Make a plot of the residuals versus fitted values, and a QQ plot of the standardized residuals.
+Comment on whether or not there are any violations of the assumptions for regression modeling.
+
+```{r}
+
+#scatter plot of residuals vs fitted values of the linear regression model
+plot(fitted(lm1), 
+     residuals(lm1), 
+     xlab = "Fitted values", 
+     ylab = "Residuals", 
+     main = "Residuals vs Fitted values")
+
+#QQ plot of standardized residuals
+qqnorm(rstandard(lm1))
+qqline(rstandard(lm1))
+
+
+```
+
+### Exercise 2:
+For this question use the Carseats data set from the ISLR package.
+
+```{r}
+# load the dataset
+data("Carseats")
+```
+
+a) Fit a multiple linear regression model to predict Sales using Price, Urban, and US.
+
+```{r}
+# multiple linear regression model of Sales using Price, Urban, and US
+lm2 <- lm(Sales ~ Price + Urban + US, data = Carseats)
+
+```
+
+b) Provide an interpretation of each coefficient in the model. Note that some of the variables are
+qualitative.
+
+```{r}
+#summary of the multiple linear regression model for Sales using Price, Urban and US
+summary(lm2)
+```
+
+- The coefficient for Price represents the change in Sales for a one-unit increase in Price, holding other variables constant. So, as the price of the product increases, we expect a decrease in sales.
+
+- The coefficients for Urban represents the average difference in sales between stores located in urban areas (UrbanYes = 1) and those not located in urban areas (UrbanYes = 0). However, the p-value is not significant (p > 0.05), indicating that there is no evidence to suggest that being in an urban area significantly affects sales i.e., if Urban is Yes, Sales decrease by the coefficient value compared to when Urban is No. 
+
+- The coefficients for US represents the average difference in sales between stores located in the US (USYes = 1) and those not located in the US (USYes = 0). A significant p-value (p < 0.05) suggests that being in the US significantly affects sales i.e., if US is Yes, Sales increase by the coefficient value compared to when US is No. 
+
+c) Write our the equation for the fitted model.
+
+The equation of the fitted model is
+
+$$Sales = \beta_0 + \beta_1*Price + \beta_2*Urban_{Yes} + \beta_3*US_{Yes} + \epsilon$$
+
+d) For which of the predictors can you reject the null hypothesis $H_0: \beta_j = 0$?
+
+For Price and US predictor variables, we reject the null hypothesis $H_0: \beta_j = 0$. Because the p-value of both Price and US is less than $\alpha$ (0.05). Hence, we reject the null hypothesis.
+
+e) On the basis of the your response to the previous question, fit a smaller model that only uses
+the predictors for which there is evidence of association with the outcome.
+
+```{r}
+# multiple linear regression model of Sales using Price and US
+lm3 <- lm(Sales ~ Price + US, data = Carseats)
+
+#summary of the multiple linear regression model for Sales using Price and US
+summary(lm3)
+```
+
+f) How well do the models in (a) and (e) fit the data
+
+```{r}
+# R-squared value of multiple linear regression model of Sales using Price, Urban, and US
+round(summary(lm2)$r.squared, 3)
+
+# R-squared value of multiple linear regression model of Sales using Price and US
+round(summary(lm3)$r.squared, 3)
+```
+
+
+The $R^2$ values from summary of models lm2 and lm3 are same, which indicates that both models fit same for the data.  
+
+g) Using the model from (e), obtain 95% confidence intervals for the coefficients.
+
+```{r}
+# 95% Confident intervals of multiple linear regression model of Sales using Price and US 
+confint(lm3)
+```
+
+The 95% confident intervals for Price is $(-0.065, -0.044)$ and for US is $(0.69, 1.71)$. 
